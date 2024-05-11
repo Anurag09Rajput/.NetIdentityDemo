@@ -18,11 +18,24 @@ namespace AngularIdentity
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // adding CORS
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
+
+
             // Adding Database 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionString"));
-            });
+        });
 
             // Adding Identity service
             builder.Services.AddIdentity<User,IdentityRole>()
@@ -78,6 +91,7 @@ namespace AngularIdentity
 
             app.UseAuthorization();
 
+            app.UseCors();
 
             app.MapControllers();
 

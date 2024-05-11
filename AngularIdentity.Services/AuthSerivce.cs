@@ -23,7 +23,7 @@ namespace Application.AngularIdentity.Services
 
         public async Task<Response> RegisterUser(UserForRegistrationDto model)
         {
-            var userExists = await this._userManager.FindByNameAsync(model.Email!);
+            var userExists = await this._userManager.FindByEmailAsync(model.Email!);
             if(userExists != null)
             {
                 return new Response { IsSuccess = false, Message = "User already Exist!", StatusCode = HttpStatusCode.BadRequest };
@@ -31,13 +31,14 @@ namespace Application.AngularIdentity.Services
 
             User user = new User
             {
+                
                 FirstName = model.FirstName,
                 LastName = model.LastName,
                 Email = model.Email,
-                /*PasswordHash = model.Password,*/
+                UserName = model.FirstName + model.LastName,
             };
-            user.PasswordHash = this._userManager.PasswordHasher.HashPassword(user, model.Password!);
 
+            
             var result  =  await this._userManager.CreateAsync(user,model.Password!);
             if (!result.Succeeded)
             {

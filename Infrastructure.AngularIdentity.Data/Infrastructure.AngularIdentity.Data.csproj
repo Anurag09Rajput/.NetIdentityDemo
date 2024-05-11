@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational.Design" Version="1.1.6" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\AngularIdentity.Contracts\Application.AngularIdentity.Contracts.csproj" />
     <ProjectReference Include="..\AngularIdentity.Services\Application.AngularIdentity.Services.csproj" />
   </ItemGroup>
