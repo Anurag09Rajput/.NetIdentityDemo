@@ -1,6 +1,7 @@
 using Application.AngularIdentity.Concerns;
 using Application.AngularIdentity.Contracts;
 using Domain.AngularIdentity.Models.Request;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Runtime.InteropServices;
 
@@ -21,9 +22,16 @@ namespace AngularIdentity.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login([FromBody] UserForAuthenticationDto userForAuthentication)
+        public async Task<IActionResult> Login([FromBody] UserForAuthenticationDto model)
         {
-            return Ok();
+            if (model == null)
+            {
+                return BadRequest("Please fill the details.!");
+            }
+
+            Response result = await this._authService.LoginUser(model);
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
+
         }
 
         [HttpPost("Register")]

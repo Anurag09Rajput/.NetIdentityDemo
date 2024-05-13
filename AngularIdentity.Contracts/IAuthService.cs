@@ -11,5 +11,6 @@ namespace Application.AngularIdentity.Contracts
     public interface IAuthService
     {
         public Task<Response> RegisterUser(UserForRegistrationDto model);
+        public Task<Response> LoginUser(UserForAuthenticationDto model);
     }
 }

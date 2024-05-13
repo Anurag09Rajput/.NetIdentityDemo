@@ -39,9 +39,9 @@ namespace Application.AngularIdentity.Services
             return claims;
         }
 
-        public string GenerateTokenOptions(UserForAuthenticationDto userForAuthentication , List<Claim> claims)
+        public string GenerateTokenOptions( List<Claim> claims)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings["Jwt:Key"]));
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings["securityKey"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
             var tokenOptions = new JwtSecurityToken(
                 issuer: _jwtSettings["validIssuer"],

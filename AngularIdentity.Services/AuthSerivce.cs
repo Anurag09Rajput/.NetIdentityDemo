@@ -2,7 +2,9 @@
 using Application.AngularIdentity.Contracts;
 using Domain.AngularIdentity.Models.Models;
 using Domain.AngularIdentity.Models.Request;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,10 +16,12 @@ namespace Application.AngularIdentity.Services
 {
     public class AuthSerivce: IAuthService
     {
+        private readonly IConfiguration _configuration;
         private readonly UserManager<User> _userManager;
 
-        public AuthSerivce(UserManager<User> useManager)
+        public AuthSerivce(UserManager<User> useManager , IConfiguration configuration)
         {
+            _configuration = configuration;
             _userManager = useManager;
         }
 
@@ -46,6 +50,28 @@ namespace Application.AngularIdentity.Services
             }
           
             return new Response { IsSuccess = true, Message = "User added successfully.", StatusCode = HttpStatusCode.OK };
+        }
+
+        public async Task<Response> LoginUser(UserForAuthenticationDto model)
+        {
+            var user =  await _userManager.FindByEmailAsync(model.Email!);
+
+            if( user == null)
+            {
+                return new Response { IsSuccess = false, Message = "User not found!" };
+            }
+
+            if(await _userManager.CheckPasswordAsync(user, model.Password!))
+            {
+                JwtHandler jwt = new JwtHandler(_configuration);
+                var claims = jwt.GetClaims(model);
+                string token = jwt.GenerateTokenOptions(claims);
+
+                return new Response<string> { IsSuccess = true, Data = token.ToString(), Message = "User authenticated successfully.", StatusCode = HttpStatusCode.OK };
+
+            }
+
+            return new Response { IsSuccess = false, Message = "Something went wrong!" };
         }
     }
 }
