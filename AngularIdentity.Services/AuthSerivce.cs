@@ -1,4 +1,5 @@
-﻿using Application.AngularIdentity.Concerns;
+﻿using AngularIdentity.Models.Request;
+using Application.AngularIdentity.Concerns;
 using Application.AngularIdentity.Contracts;
 using Domain.AngularIdentity.Models.Models;
 using Domain.AngularIdentity.Models.Request;
@@ -18,11 +19,13 @@ namespace Application.AngularIdentity.Services
     {
         private readonly IConfiguration _configuration;
         private readonly UserManager<User> _userManager;
+        private readonly JwtHandler _jwtHandler;
 
         public AuthSerivce(UserManager<User> useManager , IConfiguration configuration)
         {
             _configuration = configuration;
             _userManager = useManager;
+            _jwtHandler = new JwtHandler(configuration);
         }
 
         public async Task<Response> RegisterUser(UserForRegistrationDto model)
@@ -35,7 +38,6 @@ namespace Application.AngularIdentity.Services
 
             User user = new User
             {
-                
                 FirstName = model.FirstName,
                 LastName = model.LastName,
                 Email = model.Email,
@@ -68,10 +70,46 @@ namespace Application.AngularIdentity.Services
                 string token = jwt.GenerateTokenOptions(claims);
 
                 return new Response<string> { IsSuccess = true, Data = token.ToString(), Message = "User authenticated successfully.", StatusCode = HttpStatusCode.OK };
-
             }
 
             return new Response { IsSuccess = false, Message = "Something went wrong!" };
+        }
+
+        public async Task<Response> ExternalLogin(ExternalAuthDto externalAuth)
+        {
+            var payload = await this._jwtHandler.VerifyGoogleToken(externalAuth);
+            if(payload == null)
+                return new Response(){IsSuccess= false, Message="Invalid External Authentication"};
+
+            var info = new UserLoginInfo(externalAuth.Provider, payload.Subject, externalAuth.Provider);
+
+            var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+            if (user == null)
+            {
+                user = await _userManager.FindByEmailAsync(payload.Email);
+
+                if (user == null)
+                {
+                    user = new User { Email = payload.Email, UserName = payload.Email };
+                    await _userManager.CreateAsync(user);
+                    await _userManager.AddLoginAsync(user, info);
+                }
+                else
+                {
+                    await _userManager.AddLoginAsync(user, info);
+                }
+
+            }
+
+            if(user == null)
+            {
+                return new Response() { IsSuccess = false, Message = "Invalid External Authentication" };
+            }
+
+            var claim =  _jwtHandler.GetClaims(user);
+            var token = _jwtHandler.GenerateTokenOptions(claim);
+
+            return new Response<string> { IsSuccess = true, Data = token.ToString(), Message = "User authenticated successfully.", StatusCode = HttpStatusCode.OK };
         }
     }
 }

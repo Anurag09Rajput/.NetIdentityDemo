@@ -29,7 +29,7 @@ namespace Application.AngularIdentity.Services
 
         }
 
-        public List<Claim> GetClaims(UserForAuthenticationDto user)
+        public List<Claim> GetClaims(dynamic user)
         {
             var claims = new List<Claim>
             {

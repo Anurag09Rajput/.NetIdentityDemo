@@ -1,3 +1,4 @@
+using AngularIdentity.Models.Request;
 using Application.AngularIdentity.Concerns;
 using Application.AngularIdentity.Contracts;
 using Domain.AngularIdentity.Models.Request;
@@ -44,6 +45,18 @@ namespace AngularIdentity.Controllers
 
             Response result = await this._authService.RegisterUser(model);
             
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpPost("ExternalLogin")]
+
+        public async Task<IActionResult> ExternalLogin([FromBody] ExternalAuthDto model)
+        {
+            if(model == null)
+                return BadRequest("Something went wrong!");
+
+            Response result = await this._authService.ExternalLogin(model);
+
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
     }

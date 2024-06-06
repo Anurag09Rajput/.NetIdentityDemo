@@ -1,4 +1,5 @@
-﻿using Application.AngularIdentity.Concerns;
+﻿using AngularIdentity.Models.Request;
+using Application.AngularIdentity.Concerns;
 using Domain.AngularIdentity.Models.Request;
 using System;
 using System.Collections.Generic;
@@ -12,5 +13,7 @@ namespace Application.AngularIdentity.Contracts
     {
         public Task<Response> RegisterUser(UserForRegistrationDto model);
         public Task<Response> LoginUser(UserForAuthenticationDto model);
+        public Task<Response> ExternalLogin(ExternalAuthDto model);
     }
 }
+
